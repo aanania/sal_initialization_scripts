@@ -1,9 +1,9 @@
 cp /home/andres/setup.env /home/andres/ts_sal/setup.env
 cd /home/andres/ts_sal/
-source setup.env
-cd test
-cp ~/ts_xml/sal_interface/* .
-cp ~/ts_xml/sal_interface/*/* .
+source /home/andres/ts_sal/setup.env
+cd /home/andres/ts_sal/test
+cp ~/ts_xml/sal_interfaces/* /home/andres/ts_sal/test/.
+cp ~/ts_xml/sal_interfaces/*/* /home/andres/ts_sal/test/.
 
 for var in MTM1M3 
 do

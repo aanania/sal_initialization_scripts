@@ -53,7 +53,7 @@ global SQLREC TYPEFORMAT
 ###puts stdout $rvars
 ###puts stdout $rformat
   }
-  set record "$record [set rvars]\n	  .timestamp(int(mgr.getCurrentTime()*1000))\n	  .post_http(si,&resp);"
+  set record "$record [set rvars]\n	  .timestamp((long long)(mgr.getCurrentTime()*1000))\n	  .post_http(si,&resp);"
   return $record
 }
 

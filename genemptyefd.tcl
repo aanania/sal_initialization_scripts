@@ -121,6 +121,11 @@ global SAL_WORK_DIR
 
 proc genericefdfragment { fout base ttype ctype } {
 global ACTORTYPE SAL_WORK_DIR BLACKLIST
+   if { $ctype == "connect" } {
+       puts $fout " 
+"
+       return 
+   }
    set idlfile $SAL_WORK_DIR/idl-templates/validated/sal/sal_[set base].idl
    set ptypes [lsort [split [exec grep pragma $idlfile] \n]]
    foreach j $ptypes {
@@ -164,8 +169,7 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
 		  
           myData_[set topic]\[iloop\].private_rcvStamp = mgr.getCurrentTime();
 	  cout << myData_[set topic]\[iloop\].private_rcvStamp - myData_[set topic]\[iloop\].private_sndStamp;
-	  cout << "\n";
-          //cout << \"logged [set topic]\" << endl;
+          cout << \"logged [set topic]\" << endl;
          \}
         \}
        \}

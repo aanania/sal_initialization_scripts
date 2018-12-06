@@ -180,12 +180,12 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
              checkLFO $fout $topic
           }
           puts $fout "
-          status = [set topic]_SALReader->return_loan(myData_[set topic], [set topic]_info);
           cout << ret << endl << resp << endl;
           cout << \"logged [set topic]\" << endl;
          \}
         \}
        \}
+          status = [set topic]_SALReader->return_loan(myData_[set topic], [set topic]_info);
 "
         }
       }

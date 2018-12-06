@@ -180,8 +180,8 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
              checkLFO $fout $topic
           }
           puts $fout "
-          cout << ret << endl << resp << endl;
-          cout << \"logged [set topic]\" << endl;
+          //cout << ret << endl << resp << endl;
+          //cout << \"logged [set topic]\" << endl;
          \}
         \}
        \}

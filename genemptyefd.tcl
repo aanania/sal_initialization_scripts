@@ -121,20 +121,6 @@ global SAL_WORK_DIR
 
 proc genericefdfragment { fout base ttype ctype } {
 global ACTORTYPE SAL_WORK_DIR BLACKLIST
-   if { $ctype == "connect" } {
-       puts $fout "
-
-  char *efdb_host = getenv(\"LSST_EFD_HOST\");
-  if (efdb_host == NULL) \{
-      fprintf(stderr,\"MYSQL : LSST_EFD_HOST not defined\\n\");
-      exit(1);
-  \}
-
-  influxdb_cpp::server_info si(efdb_host,8086,\"EFD\", \"efduser\" , \"lssttest\");
- 
-"
-       return 
-   }
    set idlfile $SAL_WORK_DIR/idl-templates/validated/sal/sal_[set base].idl
    set ptypes [lsort [split [exec grep pragma $idlfile] \n]]
    foreach j $ptypes {
@@ -177,10 +163,9 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
          if (myData_[set topic]\[iloop\].private_origin != 0) \{
 		  
           myData_[set topic]\[iloop\].private_rcvStamp = mgr.getCurrentTime();
-          puts $fout "
-		  cout << myData_[set topic]\[iloop\].private_rcvStamp - myData_[set topic]\[iloop\].private_sndStamp;
-          cout << ret << endl << resp << endl;
-          cout << \"logged [set topic]\" << endl;
+	  cout << myData_[set topic]\[iloop\].private_rcvStamp - myData_[set topic]\[iloop\].private_sndStamp;
+	  cout << "\n";
+          //cout << \"logged [set topic]\" << endl;
          \}
         \}
        \}
@@ -211,15 +196,15 @@ proc checkLFO { fout topic } {
 }
 
 
-proc geninfluxwritermake { base } {
+proc genemptywritermake { base } {
 global SAL_DIR SAL_WORK_DIR env
   set frep [open /tmp/sreplace5.sal w]
   puts $frep "#!/bin/sh"
-  exec touch $SAL_WORK_DIR/[set base]/cpp/src/.depend.Makefile.sacpp_SALData_influxwriter
-  exec cp  $SAL_DIR/code/templates/Makefile.sacpp_SAL_influxwriter.template $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_influxwriter
-  puts $frep "perl -pi -w -e 's/_SAL_/_[set base]_/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_influxwriter"
-  puts $frep "perl -pi -w -e 's/SALSubsys/[set base]/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_influxwriter"
-  puts $frep "perl -pi -w -e 's/SALData/[set base]/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_influxwriter"
+  exec touch $SAL_WORK_DIR/[set base]/cpp/src/.depend.Makefile.sacpp_SALData_emptywriter
+  exec cp  $SAL_DIR/code/templates/Makefile.sacpp_SAL_emptywriter.template $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_emptywriter
+  puts $frep "perl -pi -w -e 's/_SAL_/_[set base]_/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_emptywriter"
+  puts $frep "perl -pi -w -e 's/SALSubsys/[set base]/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_emptywriter"
+  puts $frep "perl -pi -w -e 's/SALData/[set base]/g;' $SAL_WORK_DIR/[set base]/cpp/src/Makefile.sacpp_[set base]_emptywriter"
   close $frep
   exec chmod 755 /tmp/sreplace5.sal
   catch { set result [exec /tmp/sreplace5.sal] } bad
@@ -229,7 +214,7 @@ global SAL_DIR SAL_WORK_DIR env
 
 proc gentelemetryreader { base } {
 global SAL_WORK_DIR SYSDIC
-   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_telemetry_influxwriter.cpp w]
+   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_telemetry_emptywriter.cpp w]
    puts $fout "
 /*
  * This file contains the implementation for the [set base] generic Telemetry reader.
@@ -253,10 +238,10 @@ using namespace [set base];
 extern \"C\"
 \{
   OS_API_EXPORT
-  int test_[set base]_telemetry_influxwriter();
+  int test_[set base]_telemetry_emptywriter();
 \}
 
-int test_[set base]_telemetry_influxwriter()
+int test_[set base]_telemetry_emptywriter()
 \{   
 
   char *thequery = (char *) malloc(sizeof(char)*100000);
@@ -289,7 +274,7 @@ int test_[set base]_telemetry_influxwriter()
 
 int main (int argc, char **argv[])
 \{
-  return test_[set base]_telemetry_influxwriter();
+  return test_[set base]_telemetry_emptywriter();
 \}
 "
    close $fout
@@ -299,10 +284,10 @@ int main (int argc, char **argv[])
 
 proc geneventreader { base } {
 global SAL_WORK_DIR SYSDIC
-   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_event_influxwriter.cpp w]
+   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_event_emptywriter.cpp w]
    puts $fout "
 /*
- * This file contains the implementation for the [set base] generic event influxwriter.
+ * This file contains the implementation for the [set base] generic event emptywriter.
  *
  ***/
 
@@ -323,10 +308,10 @@ using namespace [set base];
 extern \"C\"
 \{
   OS_API_EXPORT
-  int test_[set base]_event_influxwriter();
+  int test_[set base]_event_emptywriter();
 \}
 
-int test_[set base]_event_influxwriter()
+int test_[set base]_event_emptywriter()
 \{
 
   char *thequery = (char *) malloc(sizeof(char)*100000);
@@ -360,7 +345,7 @@ int test_[set base]_event_influxwriter()
 
 int main (int argc, char **argv[])
 \{
-  return test_[set base]_event_influxwriter();
+  return test_[set base]_event_emptywriter();
 \}
 "
    close $fout
@@ -369,10 +354,10 @@ int main (int argc, char **argv[])
 
 proc gencommandreader { base } {
 global SAL_WORK_DIR SYSDIC
-   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_command_influxwriter.cpp w]
+   set fout [open $SAL_WORK_DIR/[set base]/cpp/src/sacpp_[set base]_command_emptywriter.cpp w]
    puts $fout "
 /*
- * This file contains the implementation for the [set base] generic command influxwriter.
+ * This file contains the implementation for the [set base] generic command emptywriter.
  *
  ***/
 
@@ -393,10 +378,10 @@ using namespace [set base];
 extern \"C\"
 \{
   OS_API_EXPORT
-  int test_[set base]_command_influxwriter();
+  int test_[set base]_command_emptywriter();
 \}
 
-int test_[set base]_command_influxwriter()
+int test_[set base]_command_emptywriter()
 \{ 
 
   char *thequery = (char *)malloc(sizeof(char)*100000);
@@ -429,7 +414,7 @@ int test_[set base]_command_influxwriter()
 
 int main (int argc, char **argv[])
 \{
-  return test_[set base]_command_influxwriter();
+  return test_[set base]_command_emptywriter();
 \}
 "
    close $fout
@@ -466,7 +451,7 @@ global SYSDIC SAL_WORK_DIR
    foreach subsys $SYSDIC(systems) {
       if { [file exists $SAL_WORK_DIR/idl-templates/validated/sal/sal_[set subsys].idl] } {
         puts stdout "Updating schema for $subsys"
-        set bad [catch {geninfluxwriters $subsys} res]
+        set bad [catch {genemptywriters $subsys} res]
         if { $bad } {puts stdout $res}
       } else {
         puts stdout "WARNING : No IDL for $subsys available"
@@ -488,7 +473,7 @@ global SYSDIC SAL_WORK_DIR
    }
 }
 
-proc geninfluxwriters { base } {
+proc genemptywriters { base } {
 global SQLREC SAL_WORK_DIR
    set SQLREC([set base]_ackcmd)  "char.private_revCode,double.private_sndStamp,double.private_rcvStamp,int.private_seqNum,int.private_origin,int.private_host,int.ack,int.error,char.result"
    set SQLREC([set base]_commandLog)  "char.private_revCode,double.private_sndStamp,int.private_seqNum,char.name,int.ack,int.error"
@@ -497,43 +482,43 @@ global SQLREC SAL_WORK_DIR
    gentelemetryreader $base
    gencommandreader   $base
    geneventreader     $base
-   geninfluxwritermake   $base
+   genemptywritermake   $base
    cd $SAL_WORK_DIR/[set base]/cpp/src
-   exec make -f Makefile.sacpp_[set base]_influxwriter
+   exec make -f Makefile.sacpp_[set base]_emptywriter
 }
 
-proc startinfluxwriters { subsys } { 
+proc startemptywriters { subsys } { 
 global SAL_WORK_DIR
    foreach s $subsys {
-      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_influxwriter] == 0 } {
+      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_emptywriter] == 0 } {
          puts sdout "ERROR : No telemetry writer available for $s"
          exit
       }
-      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_influxwriter] == 0 } {
+      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_emptywriter] == 0 } {
          puts sdout "ERROR : No command writer available for $s"
          exit
       }
-      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_influxwriter] == 0 } {
+      if { [file exists $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_emptywriter] == 0 } {
          puts sdout "ERROR : No event writer available for $s"
          exit
       }
-      set tid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_influxwriter >& efd_[set s]_telemetry_[clock seconds].log &]
-      set cid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_influxwriter >& efd_[set s]_command_[clock seconds].log &]
-      set eid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_event_influxwriter >& efd_[set s]_event_[clock seconds].log &]
+      set tid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_emptywriter >& efd_[set s]_telemetry_[clock seconds].log &]
+      set cid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_emptywriter >& efd_[set s]_command_[clock seconds].log &]
+      set eid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_event_emptywriter >& efd_[set s]_event_[clock seconds].log &]
    }
    while { 1 } {
      foreach s $subsys {
        set bad [catch {exec ps -F --pid $tid($s)} res]
        if { $bad } {
-          set tid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_influxwriter >& efd_[set s]_telemetry_[clock seconds].log &]
+          set tid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_telemetry_emptywriter >& efd_[set s]_telemetry_[clock seconds].log &]
        }
        set bad [catch {exec ps -F --pid $cid($s)} res]
        if { $bad } {
-          set cid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_influxwriter >& efd_[set s]_command_[clock seconds].log &]
+          set cid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_command_emptywriter >& efd_[set s]_command_[clock seconds].log &]
        }
        set bad [catch {exec ps -F --pid $eid($s)} res]
        if { $bad } {
-          set eid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_event_influxwriter >& efd_[set s]_event_[clock seconds].log &]
+          set eid($s) [exec $SAL_WORK_DIR/[set s]/cpp/src/sacpp_[set s]_event_emptywriter >& efd_[set s]_event_[clock seconds].log &]
        }
      }
    }

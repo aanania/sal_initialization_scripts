@@ -148,6 +148,7 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
 #      }
       if { $ctype == "subscriber" } {
        puts $fout "  mgr.salTelemetrySub(\"[set base]_[set topic]\");
+  double last_timestamp_[set base]_[set topic];
   actorIdx = SAL__[set base]_[set topic]_ACTOR;
   DataReader_var [set topic][set revcode]_dreader = mgr.getReader(actorIdx);
   [set base]::[set topic][set revcode]DataReader_var [set topic]_SALReader = [set base]::[set topic][set revcode]DataReader::_narrow([set topic][set revcode]_dreader.in());
@@ -168,8 +169,10 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
          if (myData_[set topic]\[iloop\].private_origin != 0) \{
 		  
           myData_[set topic]\[iloop\].private_rcvStamp = mgr.getCurrentTime();
-	  cout << myData_[set topic]\[iloop\].private_rcvStamp - myData_[set topic]\[iloop\].private_sndStamp;
+          cout << \"Delta received time: \" << myData_[set topic]\[iloop\].private_sndStamp - last_timestamp_[set base]_[set topic]; 
+	  cout << \"Rcvd - Sent: \" << myData_[set topic]\[iloop\].private_rcvStamp - myData_[set topic]\[iloop\].private_sndStamp;
           cout << \"logged [set topic]\" << endl;
+	  last_timestamp_[set base]_[set topic] = myData_[set topic]\[iloop\].private_sndStamp; 
          \}
         \}
        \}
@@ -488,7 +491,7 @@ global SQLREC SAL_WORK_DIR
    geneventreader     $base
    genemptywritermake   $base
    cd $SAL_WORK_DIR/[set base]/cpp/src
-   exec make -f Makefile.sacpp_[set base]_emptywriter
+   #exec make -f Makefile.sacpp_[set base]_emptywriter
 }
 
 proc startemptywriters { subsys } { 

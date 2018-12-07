@@ -5,7 +5,7 @@ cd /home/andres/ts_sal/test
 cp ~/ts_xml/sal_interfaces/* /home/andres/ts_sal/test/.
 cp ~/ts_xml/sal_interfaces/*/* /home/andres/ts_sal/test/.
 
-for var in MTM1M3 
+for var in Electrometer 
 do
 	salgenerator $var validate
 	salgenerator $var sal html

@@ -17,10 +17,10 @@
 #
 
 
-proc writetoefd { topic } {
+proc writetoefd1 { topic } {
 global SQLREC TYPEFORMAT
   set flds [split $SQLREC($topic) ,]
-  set record "int ret=influxdb_cpp::builder()\n	  .meas(\"$topic\")"
+  set record "build\n	  .meas(\"$topic\", true)"
   set rformat ""
   set rvars ""
   set ldata "myData_[join [lrange [split $topic _] 1 end] _]"
@@ -53,10 +53,88 @@ global SQLREC TYPEFORMAT
 ###puts stdout $rvars
 ###puts stdout $rformat
   }
-  set record "$record [set rvars]\n	  .post_http(si,&resp);"
+  set record "$record [set rvars]\n	  .timestamp((unsigned long long)(mgr.getCurrentTime()*1000000000));\n"
   return $record
 }
 
+proc writetoefd3 { topic } {
+global SQLREC TYPEFORMAT
+  set flds [split $SQLREC($topic) ,]
+  set record "build\n	  .meas(\"$topic\", false)"
+  set rformat ""
+  set rvars ""
+  set ldata "myData_[join [lrange [split $topic _] 1 end] _]"
+  while { [llength $flds] != 0 } {
+      set i [lindex $flds 0]
+      set flds [lrange $flds 1 end]
+      set type [lindex [split $i .] 0]
+      set name [lindex [split $i .] 1]
+      set isarray [lindex [split $i .] 2]
+      if { $type == "char" } {
+             set name "[set name].m_ptr"
+             set isarray ""
+      } 
+###puts stdout "$i $type $name $isarray"
+      if { $isarray == "" } {
+              set value "[set ldata]\[iloop\].[set name]"
+      } else {
+             set value "[set ldata]\[iloop\].[set name]\[0\]"
+             set j 1
+             while { $j <= [expr $isarray -1] } {
+                set value "[set ldata]\[iloop\].[set name]\[$j\]"
+                set rvars "$rvars\n	  .field(\"[set name][set j]\",$value)"
+                incr j 1
+             }
+             set value [string trim $value ","]
+      }
+      if { $isarray == "" } {
+        set rvars "$rvars\n	  .field(\"[set name]\",$value)"
+      }
+###puts stdout $rvars
+###puts stdout $rformat
+  }
+  set record "$record [set rvars]\n	  .timestamp((unsigned long long)(mgr.getCurrentTime()*1000000000));\n"
+  return $record
+}
+proc writetoefd2 { topic } {
+global SQLREC TYPEFORMAT
+  set flds [split $SQLREC($topic) ,]
+  set record "ret = build\n	  .meas(\"$topic\", false)"
+  set rformat ""
+  set rvars ""
+  set ldata "myData_[join [lrange [split $topic _] 1 end] _]"
+  while { [llength $flds] != 0 } {
+      set i [lindex $flds 0]
+      set flds [lrange $flds 1 end]
+      set type [lindex [split $i .] 0]
+      set name [lindex [split $i .] 1]
+      set isarray [lindex [split $i .] 2]
+      if { $type == "char" } {
+             set name "[set name].m_ptr"
+             set isarray ""
+      } 
+###puts stdout "$i $type $name $isarray"
+      if { $isarray == "" } {
+              set value "[set ldata]\[iloop\].[set name]"
+      } else {
+             set value "[set ldata]\[iloop\].[set name]\[0\]"
+             set j 1
+             while { $j <= [expr $isarray -1] } {
+                set value "[set ldata]\[iloop\].[set name]\[$j\]"
+                set rvars "$rvars\n	  .field(\"[set name][set j]\",$value)"
+                incr j 1
+             }
+             set value [string trim $value ","]
+      }
+      if { $isarray == "" } {
+        set rvars "$rvars\n	  .field(\"[set name]\",$value)"
+      }
+###puts stdout $rvars
+###puts stdout $rformat
+  }
+  set record "$record [set rvars]\n	  .timestamp((unsigned long long)(mgr.getCurrentTime()*1000000000))\n	  .post_http(si,&resp);"
+  return $record
+}
 
 proc readfromefd { topic irow } {
 global SQLREC TYPEFORMAT
@@ -172,10 +250,20 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
        mgr.checkStatus(status,\"[set base]::[set topic][set revcode]DataReader::take\");
        numsamp = myData_[set topic].length();
        if (status == SAL__OK && numsamp > 0) \{
+	influxdb_cpp::builder build;
+        bool first_value = true;
+        int ret;
         for (iloop=0;iloop<numsamp;iloop++) \{
          if (myData_[set topic]\[iloop\].private_origin != 0) \{
           myData_[set topic]\[iloop\].private_rcvStamp = mgr.getCurrentTime();
-          [writetoefd [set base]_[set topic]]"
+          if(iloop<numsamp-1 && first_value){
+                first_value = false;
+	  	[writetoefd1 [set base]_[set topic]]
+	  }else if(iloop<numsamp-1 && !first_value){
+                [writetoefd3 [set base]_[set topic]]
+          }else{
+	  	[writetoefd2 [set base]_[set topic]]
+	  }"
           if { $base != "efd" } {
              checkLFO $fout $topic
           }
@@ -500,7 +588,7 @@ global SQLREC SAL_WORK_DIR
    geneventreader     $base
    geninfluxwritermake   $base
    cd $SAL_WORK_DIR/[set base]/cpp/src
-   exec make -f Makefile.sacpp_[set base]_influxwriter
+   #exec make -f Makefile.sacpp_[set base]_influxwriter
 }
 
 proc startinfluxwriters { subsys } { 

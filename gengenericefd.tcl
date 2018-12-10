@@ -87,11 +87,11 @@ global SQLREC TYPEFORMAT
   set rformat "FROM_UNIXTIME(\\\%lf\\) $rformat"
   set rvars "mgr.getCurrentTime()$rvars"
   if { $firstvalue == 0 } {
-      set record "$record [set rformat]),\", $rvars );\n	strcat(thequery, auxquery);\n	strcat(thequery, \"\\n\");	\n\}\n "
+      set record "$record [set rformat])\", $rvars );\n	strcat(thequery, auxquery);\n	strcat(thequery, \",\\n\");	\n\}\n "
   } elseif { $firstvalue == 1 } {
-      set record "$record [set rformat]),\", $rvars );\n	strcat(thequery, \"\\n\");	\n\}\n "
+      set record "$record [set rformat])\", $rvars );\n	if(numsamp==1)	strcat(thequery, \";\\n\"); \n	else strcat(thequery, \",\\n\");	\n\}\n "
   } else {
-      set record "$record [set rformat]);\", $rvars );\n	strcat(thequery, auxquery);\n	strcat(thequery, \"\\n\");	\n\}\n "
+      set record "$record [set rformat])\", $rvars );\n	strcat(thequery, auxquery);\n	strcat(thequery, \";\\n\");	\n\}\n "
   }
   return $record
 }
@@ -235,7 +235,7 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
 		  [writetoefd [set base]_[set topic] 2]
 		  [writetoefd [set base]_[set topic] 0]
 		  
-	//          cout << thequery << endl;
+	            //cout << thequery << endl;
 		  if (myData_[set topic]\[iloop\].private_origin > 0) \{
 		    if (isyslog > 0) \{
 		       syslog(NULL,\"%s\",thequery);
@@ -252,7 +252,7 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
           sprintf(thequery,\"INSERT INTO [set base]_commandLog VALUES (NOW(6),'%s', %lf, %d, $alias, 0, 0 )\" , 
                     myData_[set topic]\[iloop\].private_revCode.m_ptr, myData_[set topic]\[iloop\].private_sndStamp, myData_[set topic]\[iloop\].private_seqNum);
           mstatus = mysql_query(con,thequery);
-//        cout << thequery << endl;
+          //cout << thequery << endl;
           if (mstatus) \{
              fprintf(stderr,\"MYSQL INSERT ERROR : %d : %s\\n\",mstatus,thequery);
           \}"
@@ -265,7 +265,7 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
                     myData_[set topic]\[iloop\].private_revCode.m_ptr, myData_[set topic]\[iloop\].private_sndStamp, myData_[set topic]\[iloop\].private_seqNum,myData_[set topic]\[iloop\].ack,myData_[set topic]\[iloop\].error);
           
           mstatus = mysql_query(con,thequery);
-//        cout << thequery << endl;
+          //cout << thequery << endl;
           if (mstatus) \{
           fprintf(stderr,\"MYSQL INSERT ERROR : %d : %s\\n\",mstatus,thequery);
           \}"

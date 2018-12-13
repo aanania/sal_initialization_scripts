@@ -167,18 +167,15 @@ global ACTORTYPE SAL_WORK_DIR BLACKLIST
       fprintf(stderr,\"MYSQL init error %s\\n\",mysql_error(con));
       exit(1);
   \}
-
   char *efdb_host = getenv(\"LSST_EFD_HOST\");
   if (efdb_host == NULL) \{
       fprintf(stderr,\"MYSQL : LSST_EFD_HOST not defined\\n\");
       exit(1);
   \}
-
   char *efdb_log = getenv(\"LSST_EFD_SYSLOG\");
   if (efdb_log == NULL) \{
      isyslog = 0;
   \}
-
   if (mysql_real_connect(con, efdb_host, \"efduser\" , \"lssttest\", \"EFD\", 0 , NULL, 0) == NULL) \{
       fprintf(stderr,\"MYSQL Failed to connect %s\\n\",mysql_error(con));
       exit(1);
@@ -292,15 +289,12 @@ proc genqueryefd { fout base topic key } {
 #include <time.h>
 #include \"SAL_[set base].h\"
 using namespace [set base];
-
 int SAL_[set base]::getLastSample_[set topic] ([set base]_[set topic]C *mydata) \{
-
       int num_fields=0;
       int mstatus=0;
       char *thequery = (char *) malloc(sizeof(char)*4000);
       MYSQL_RES *result;
       MYSQL_ROW *row;
-
       if ( getSample_[set topic] ([set base]_[set topic]C *mydata) == SAL__NO_UPDATES) \{
         sprintf(thequery,\"SELECT * FROM [set base]_[set topic] LIMIT 1;\");
         mstatus = mysql_query(efdConnection,thequery);
@@ -365,7 +359,6 @@ global SAL_WORK_DIR SYSDIC
  * This file contains the implementation for the [set base] generic Telemetry reader.
  *
  ***/
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -378,23 +371,21 @@ global SAL_WORK_DIR SYSDIC
 #include \"os.h\"
 using namespace DDS;
 using namespace [set base];
-
 /* entry point exported and demangled so symbol can be found in shared library */
 extern \"C\"
 \{
   OS_API_EXPORT
   int test_[set base]_telemetry_efdwriter();
 \}
-
 int test_[set base]_telemetry_efdwriter()
 \{   
-
   char *thequery = (char *) malloc(sizeof(char)*1000000);
   SAL_[set base] mgr = SAL_[set base]();
 "
   genericefdfragment $fout $base telemetry init
   puts $fout "
-  os_time delay_10us = \{ 0, 10000 \};
+  os_time delay_1000us = \{ 0, 1000000 \};
+   
   int numsamp = 0;
   int actorIdx = 0;
   int isyslog = 1;
@@ -408,16 +399,13 @@ int test_[set base]_telemetry_efdwriter()
 "
   genericefdfragment $fout $base telemetry getsamples
    puts $fout "
-          os_nanoSleep(delay_10us);
+          os_nanoSleep(delay_1000us);
       \}
-
   /* Remove the DataWriters etc */
       mysql_close(con);
       mgr.salShutdown();
-
       return 0;
 \}
-
 int main (int argc, char **argv[])
 \{
   return test_[set base]_telemetry_efdwriter();
@@ -436,7 +424,6 @@ global SAL_WORK_DIR SYSDIC
  * This file contains the implementation for the [set base] generic event efdwriter.
  *
  ***/
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -449,24 +436,21 @@ global SAL_WORK_DIR SYSDIC
 #include \"os.h\"
 using namespace DDS;
 using namespace [set base];
-
 /* entry point exported and demangled so symbol can be found in shared library */
 extern \"C\"
 \{
   OS_API_EXPORT
   int test_[set base]_event_efdwriter();
 \}
-
 int test_[set base]_event_efdwriter()
 \{
-
   char *thequery = (char *) malloc(sizeof(char)*1000000);
   SAL_[set base] mgr = SAL_[set base]();
 "
   genericefdfragment $fout $base logevent init
 
   puts $fout "
-  os_time delay_10us = \{ 0, 10000 \};
+  os_time delay_1000us = \{ 0, 1000000 \};
   int numsamp = 0;
   int actorIdx = 0;
   int isyslog = 1;
@@ -480,16 +464,13 @@ int test_[set base]_event_efdwriter()
 "
   genericefdfragment $fout $base logevent getsamples
    puts $fout "
-     os_nanoSleep(delay_10us);
+     os_nanoSleep(delay_1000us);
   \}
-
   /* Remove the DataWriters etc */
   mysql_close(con);
   mgr.salShutdown();
-
   return 0;
 \}
-
 int main (int argc, char **argv[])
 \{
   return test_[set base]_event_efdwriter();
@@ -507,7 +488,6 @@ global SAL_WORK_DIR SYSDIC
  * This file contains the implementation for the [set base] generic command efdwriter.
  *
  ***/
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -520,23 +500,20 @@ global SAL_WORK_DIR SYSDIC
 #include \"os.h\"
 using namespace DDS;
 using namespace [set base];
-
 /* entry point exported and demangled so symbol can be found in shared library */
 extern \"C\"
 \{
   OS_API_EXPORT
   int test_[set base]_command_efdwriter();
 \}
-
 int test_[set base]_command_efdwriter()
 \{ 
-
   char *thequery = (char *)malloc(sizeof(char)*1000000);
   SAL_[set base] mgr = SAL_[set base]();
 "
   genericefdfragment $fout $base command init
   puts $fout "
-  os_time delay_10us = \{ 0, 10000 \};
+  os_time delay_1000us = \{ 0, 1000000 \};
   int numsamp = 0;
   int actorIdx = 0;
   int isyslog = 1;
@@ -550,16 +527,13 @@ int test_[set base]_command_efdwriter()
 "
   genericefdfragment $fout $base command getsamples
    puts $fout "
-     os_nanoSleep(delay_10us);
+     os_nanoSleep(delay_1000us);
   \}
-
   /* Remove the DataWriters etc */
   mysql_close(con);
   mgr.salShutdown();
-
   return 0;
 \}
-
 int main (int argc, char **argv[])
 \{
   return test_[set base]_command_efdwriter();
@@ -746,5 +720,4 @@ source $SAL_DIR/add_system_dictionary.tcl
 source $SAL_DIR/revCodes.tcl
 source $SAL_DIR/managetypes.tcl
 source $SAL_DIR/activaterevcodes.tcl
-
 
